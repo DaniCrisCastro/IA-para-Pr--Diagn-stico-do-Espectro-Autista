@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  autismo-api:
+    build: .
+    container_name: autismo-api
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    restart: unless-stopped

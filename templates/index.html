@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Triagem de Autismo - AQ-10</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 30px; }
+        form { background: #fff; padding: 20px; border-radius: 10px; max-width: 700px; margin: auto; box-shadow: 0 0 10px #ccc; }
+        label { display: block; margin-top: 18px; font-weight: bold; }
+        select, input[type="number"] { margin-top: 6px; }
+        button { margin-top: 20px; padding: 10px 22px; border: none; background: #1768ac; color: #fff; border-radius: 5px; font-size: 16px;}
+        .resultado { margin: 24px auto 0; max-width: 700px; background: #e8ffe8; border: 1px solid #b2ffb2; padding: 18px; border-radius: 10px;}
+        .erro { background: #ffe8e8; border: 1px solid #ffb2b2; color: #a00; }
+    </style>
+</head>
+<body>
+    <h2>Formulário AQ-10 - Triagem de Autismo em Adultos</h2>
+    <form method="POST" action="/">
+        {% for pergunta in perguntas %}
+            <label>
+                {{ loop.index }}. {{ pergunta }}
+                <select name="A{{loop.index}}_Score" required>
+                    <option value="">Selecione</option>
+                    <option value="definitely_agree" {% if respostas.get('A' ~ loop.index ~ '_Score', '') == 'definitely_agree' %}selected{% endif %}>Concordo totalmente</option>
+                    <option value="slightly_agree" {% if respostas.get('A' ~ loop.index ~ '_Score', '') == 'slightly_agree' %}selected{% endif %}>Concordo um pouco</option>
+                    <option value="slightly_disagree" {% if respostas.get('A' ~ loop.index ~ '_Score', '') == 'slightly_disagree' %}selected{% endif %}>Discordo um pouco</option>
+                    <option value="definitely_disagree" {% if respostas.get('A' ~ loop.index ~ '_Score', '') == 'definitely_disagree' %}selected{% endif %}>Discordo totalmente</option>
+                </select>
+            </label>
+        {% endfor %}
+        <label>Idade:
+            <input type="number" name="age" min="1" max="120" required value="{{ respostas.get('age', '') }}">
+        </label>
+        <label>Sexo:
+            <select name="gender" required>
+                <option value="">Selecione</option>
+                <option value="1" {% if respostas.get('gender', '') == '1' %}selected{% endif %}>Masculino</option>
+                <option value="0" {% if respostas.get('gender', '') == '0' %}selected{% endif %}>Feminino</option>
+            </select>
+        </label>
+        <button type="submit">Enviar e Ver Resultado</button>
+    </form>
+    {% if score_final is not none %}
+        <div class="resultado">
+            <strong>Pontuação AQ-10:</strong> {{ score_final }} de 10<br>
+            <b>{{ recomendacao }}</b>
+        </div>
+    {% endif %}
+    {% if resultado %}
+        <div class="resultado {% if resultado.erro %}erro{% endif %}">
+            {% if resultado.erro %}
+                <b>Erro:</b> {{ resultado.erro }}
+            {% else %}
+                <strong>Resultado do Modelo:</strong><br>
+                Autismo: <b>{{ "Positivo" if resultado.resultado else "Negativo" }}</b><br>
+                {% if resultado.probabilidade_autismo %}
+                    Probabilidade de autismo: {{ (resultado.probabilidade_autismo*100)|round(1) }}%
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endif %}
+</body>
+</html>
